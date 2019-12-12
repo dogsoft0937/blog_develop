@@ -1,7 +1,16 @@
 var express=require("express")
 var app=express()
 var router=express.Router()
+var mysql=require("mysql")
 
+var connection=mysql.createConnection({
+    host:"localhost",
+    port:3306,
+    user:"root",
+    password:"P@ssw0rd",
+    database:"blog"
+})
+connection.connect()
 router.get("/",function(req,res){
     res.render("../views/register")
 })

@@ -29,7 +29,6 @@ router.post("/",function(req,res){
                             res.render("../views/index.ejs",{notice:"비밀번호가 맞지않습니다."})
                         }
                     }
-                    res.render("../views/index.ejs",{notice:"비밀번호가 맞지않습니다."})
                 }else{
                     res.render("../views/index.ejs",{notice:"존재하지 않는 계정입니다."})
                 }
