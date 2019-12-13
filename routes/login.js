@@ -36,6 +36,7 @@ router.post("/",function(req,res){
                             req.session.name=result[0].name
                             req.session.id=uid
                             req.session.pw=upw
+                            req.session.isLogined=true;
                             req.session.save(function(){
                                 res.render(path.join(__dirname,"../views/main.ejs"),{name:result[0].name,id:uid,password:upw,notice:"로그인 성공"})
                             })
