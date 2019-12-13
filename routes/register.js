@@ -2,7 +2,7 @@ var express=require("express")
 var app=express()
 var router=express.Router()
 var mysql=require("mysql")
-
+var path=require("path")
 var connection=mysql.createConnection({
     host:"localhost",
     port:3306,
@@ -32,17 +32,17 @@ router.post("/",function(req,res){
                         if(error){
                             console.log(error)
                         }else{
-                            res.render('../views/main.ejs', { name:uname,id:uid,password:upw,notice:"회원가입 성공" });
+                            res.render(path.join(__dirname,"../views/main.ejs"), { name:uname,id:uid,password:upw,notice:"회원가입 성공" });
                         }
                     })
                 }else{
-                    res.render("../views/register.ejs",{notice:"존재하는 계정입니다."})
+                    res.render(path.join(__dirname,"../views/register.ejs"),{notice:"존재하는 계정입니다."})
                 }
             }
         })
         
     }else{
-        res.render("../views/register.ejs",{notice:"회원 정보가 부족합니다."})
+        res.render(path.join(__dirname,"../views/register.ejs"),{notice:"회원 정보가 부족합니다."})
     }
 })
 module.exports=router
