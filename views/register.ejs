@@ -11,5 +11,10 @@
         </div>
         <button type="submit">회원가입</button>
     </form>
+    <div style="color:red">
+        <%if(locals.notice){%>
+            <p><%= notice %></p>
+        <%}%>
+    </div>
 </body>
 </html>

@@ -10,5 +10,8 @@
     <%}%>
     <h1><%= id %></h1>
     <h1><%= password %></h1>
+    <%if(locals.notice){%>
+      <h2><%= notice %></h2>
+    <%}%>
   </body>
 </html>
