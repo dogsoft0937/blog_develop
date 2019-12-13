@@ -3,14 +3,23 @@ var app=express()
 var router=express.Router()
 var path = require('path');
 var mysql=require("mysql")
-
-var connection=mysql.createConnection({
+var session=require("express-session")
+var mysqlstore=require("express-mysql-session")(session)
+var options={
     host:"localhost",
     port:3306,
     user:"root",
     password:"P@ssw0rd",
     database:"blog"
-})
+}
+var sessionstore=new mysqlstore(options)
+router.use(session({
+    secret:"mdkawlgawmlk",
+    resave:false,
+    saveUninitialized:true,
+    store:sessionstore
+}))
+var connection=mysql.createConnection(options)
 connection.connect()
 router.post("/",function(req,res){
     uid=req.body.id
@@ -24,7 +33,13 @@ router.post("/",function(req,res){
                 if(result.length>0){
                     if(uid==result[0].id){
                         if(upw===result[0].password){
-                            res.render(path.join(__dirname,"../views/main.ejs"),{name:result[0].name,id:uid,password:upw,notice:"로그인 성공"})
+                            req.session.name=result[0].name
+                            req.session.id=uid
+                            req.session.pw=upw
+                            req.session.save(function(){
+                                res.render(path.join(__dirname,"../views/main.ejs"),{name:result[0].name,id:uid,password:upw,notice:"로그인 성공"})
+                            })
+                            // res.render(path.join(__dirname,"../views/main.ejs"),{name:result[0].name,id:uid,password:upw,notice:"로그인 성공"})
                         }else{
                             res.render(path.join(__dirname,"../views/index.ejs"),{notice:"비밀번호가 맞지않습니다."})
                         }
