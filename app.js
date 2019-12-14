@@ -14,8 +14,7 @@ app.use(express.static(__dirname + "/views"));
 app.use("/auth",auth)
 app.get("/",function(req,res){
   // res.sendFile(path.join(__dirname,"/views/index.html"))
-  // res.render(path.join(__dirname,"/views/index"),{"message":req.flash()})
-  res.redirect('/auth/login')
+  res.render(path.join(__dirname,"/views/index"))
 })
 http.listen(port,function(){
   console.log("http://localhost:3000")
