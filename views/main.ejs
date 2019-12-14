@@ -5,13 +5,18 @@
   </head>
   <body>
     example ejs
-    <%if(locals.name){%>
-    <h1><%= name %></h1>
-    <%}%>
+    <%if(locals.id){%>
     <h1><%= id %></h1>
+    <%}%>
+    <%if(locals.name&&locals.password){%>
+    <h1><%= name %></h1>
     <h1><%= password %></h1>
+    <%}%>
     <%if(locals.notice){%>
       <h2><%= notice %></h2>
     <%}%>
+    <form action="/auth/logout" method="get">
+      <button type="submit">로그아웃</button>
+    </form>
   </body>
 </html>
