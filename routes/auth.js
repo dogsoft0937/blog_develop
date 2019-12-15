@@ -85,16 +85,12 @@ passport.use("local-signup",new LocalStrategy({
     }
 ))
 passport.serializeUser(function(user, done) {
-    console.log("serial")
+    user[0].count=0
     console.log(user)
-    console.log(user.id)
-    console.log(user.password)
-    user.count=0
     done(null, user);
 });
 passport.deserializeUser(function(user, done) {
-    console.log("deserial")
-    user[0].count++
+    user[0].count
     console.log(user[0].count) 
     done(null,user)
 });  
