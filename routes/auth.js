@@ -28,22 +28,14 @@ router.use(passport.initialize())
 router.use(passport.session())
 router.use(flash())
 
-
-passport.serializeUser(function(user, done) {
-    done(null, user[0].id);
-});
-passport.deserializeUser(function(id, done) {
-    var query="select * from user where id=?"
-    connection.query(query,id,function(err,result){
-        done(err,result[0].id)
-    })
-});
 var connection=mysql.createPool(options)
-passport.use(new LocalStrategy({
+
+//로그인 passport
+passport.use("local-signin",new LocalStrategy({
     usernameField:"id",
-    passwordField:"password"
-    },
-    function(username,password,done){
+    passwordField:"password",
+    passReqToCallback:true
+    },function(req,username,password,done){
         var query="select * from user where id=?"
         connection.query(query,username,function(err,result){
             if(err){
@@ -53,68 +45,101 @@ passport.use(new LocalStrategy({
                     if(password==result[0].password){
                         done(null,result)
                     }else{
-                        done(null,false,{message:"비밀번호 오류"})
+                        done(null,false,req.flash("signinMessage","비밀번호 오류"))
                     }
                 }else{
-                    done(null,false,{message:"존재하지 않는 계정"})
+                    done(null,false,req.flash("signinMessage","계정이 존재하지 않음"))
                 }
             }
-        })
-    }
-    ))
-//로그인
-router.get("/login",function(req,res){
-    res.render(path.join(__dirname,"../views/index"),{"message": req.flash("error")})
 })
-router.post("/login",passport.authenticate("local",{
-    failureRedirect:"/auth/login",failureFlash:true}),
-    function(req,res){
-        req.session.save(function(){
-            console.log(req.body)
-            res.render(path.join(__dirname,"../views/main"),{name:req.body.id,password:req.body.password})
-        })
-    }
-)
-//로그아웃
-router.get("/logout",function(req,res){
-    req.logout()
-    req.session.save(function(){
-        res.redirect("/")
-    })
-})
-//회원가입
-router.get("/register",function(req,res){
-    res.render("../views/register")
-})
-router.post("/register",function(req,res){
-    result=req.body
-    uname=result.name
-    uid=result.id
-    upw=result.password
-    if(uname&&uid&&upw){
-        var selectquery="select * from user where id=?"
-        connection.query(selectquery,uid,function(error,result){
-            if(error){
-                console.log(error)
+}
+))
+// 회원가입 passport
+passport.use("local-signup",new LocalStrategy({
+    usernameField:"id",
+    passwordField:"password",
+    passReqToCallback:true
+    },
+    function(req,username,password,done){
+        var nick=req.body.name
+        var query="select * from user where id=?"
+        connection.query(query,username,function(err,result){
+            if(err){
+                console.log(err)
             }else{
                 if(result.length==0){
                     var insertquery="insert into user(name,id,password) values(?,?,?)"
-                    var data=[uname,uid,upw]
+                    var data=[nick,username,password]
                     connection.query(insertquery,data,function(error,result){
                         if(error){
                             console.log(error)
                         }else{
-                            res.render(path.join(__dirname,"../views/main.ejs"), { name:uname,id:uid,password:upw,notice:"회원가입 성공" });
+                            done(null,result)
                         }
                     })
                 }else{
-                    res.render(path.join(__dirname,"../views/register.ejs"),{notice:"존재하는 계정입니다."})
+                    done(null,false,req.flash("signupMessage","존재하는 계정입니다."))
                 }
             }
         })
-        
+    }
+))
+passport.serializeUser(function(user, done) {
+    console.log("serial")
+    console.log(user)
+    console.log(user.id)
+    console.log(user.password)
+    user.count=0
+    done(null, user);
+});
+passport.deserializeUser(function(user, done) {
+    console.log("deserial")
+    user[0].count++
+    console.log(user[0].count) 
+    done(null,user)
+});  
+
+//로그인 passport
+
+
+//로그인
+router.get("/login",function(req,res){
+    res.render(path.join(__dirname,"../views/login"),{message:req.flash("signinMessage"),user:req.user})
+})
+router.post("/login",passport.authenticate("local-signin",{
+    failureRedirect:"/auth/login",
+    failureFlash:true,
+    successRedirect:'/auth/main'
+    })
+)
+
+//회원가입
+router.get("/register",function(req,res){
+    res.render(path.join(__dirname,"../views/register"),{message: req.flash("signupMessage")})
+})
+router.post("/register",passport.authenticate("local-signup",{
+    failureRedirect:"/auth/register",
+    failureFlash:true,
+    successRedirect:'/auth/login'
+    })
+)
+
+//메인 페이지
+router.get("/main",function(req,res){
+    if(!req.user){
+        res.redirect("/auth/login")
+        return;
+    }
+    if(Array.isArray(req.user)){
+        res.render(path.join(__dirname,"../views/main"),{user:req.user[0]})
     }else{
-        res.render(path.join(__dirname,"../views/register.ejs"),{notice:"회원 정보가 부족합니다."})
+        res.render(path.join(__dirname,"../views/main"),{user:req.user})
     }
 })
+//로그아웃
+router.get("/logout",function(req,res){
+    req.logout()
+    res.redirect("/")  
+})
+
 module.exports=router
