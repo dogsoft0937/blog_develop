@@ -85,13 +85,9 @@ passport.use("local-signup",new LocalStrategy({
     }
 ))
 passport.serializeUser(function(user, done) {
-    user[0].count=0
-    console.log(user)
     done(null, user);
 });
 passport.deserializeUser(function(user, done) {
-    user[0].count
-    console.log(user[0].count) 
     done(null,user)
 });  
 
@@ -100,7 +96,11 @@ passport.deserializeUser(function(user, done) {
 
 //로그인
 router.get("/login",function(req,res){
-    res.render(path.join(__dirname,"../views/login"),{message:req.flash("signinMessage"),user:req.user})
+    if(!req.user){
+    res.render(path.join(__dirname,"../views/login"),{message:req.flash("signinMessage")})
+    }else{
+        res.redirect("/auth/main")
+    }
 })
 router.post("/login",passport.authenticate("local-signin",{
     failureRedirect:"/auth/login",
@@ -111,7 +111,11 @@ router.post("/login",passport.authenticate("local-signin",{
 
 //회원가입
 router.get("/register",function(req,res){
-    res.render(path.join(__dirname,"../views/register"),{message: req.flash("signupMessage")})
+    if(req.user){
+        res.render(path.join(__dirname,"../views/register"),{message: req.flash("signupMessage")})
+    }else{
+        res.redirect("/auth/main")
+    }
 })
 router.post("/register",passport.authenticate("local-signup",{
     failureRedirect:"/auth/register",
@@ -133,9 +137,27 @@ router.get("/main",function(req,res){
     }
 })
 //로그아웃
+
 router.get("/logout",function(req,res){
     req.logout()
     res.redirect("/")  
+})
+
+//글쓰기
+router.get("/write",function(req,res){
+    if(!req.user){
+        res.redirect("/auth/login")
+        return;
+    }else{
+    res.render(path.join(__dirname,"../views/write"))
+    }
+})
+router.post("/write",function(req,res){
+    console.log(req.user[0].name)
+    console.log(req.user[0].id)
+    console.log(req.user[0].password)
+    console.log(req.body.title)
+    console.log(req.body.story)
 })
 
 module.exports=router

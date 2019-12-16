@@ -4,12 +4,14 @@
       <meta charset="utf-8"/>
   </head>
   <body>
-    example ejs
+    <h1>Welcome</h1>
     <%if(user){%>
-    <h1><%= user.id %></h1>
-    <h1><%= user.password%></h1>
-    <h1><%= user.count%></h1>
+    <h1><%=user.id %></h1>
+    <h1><%=user.password %></h1>
     <%}%>
+    <form action="/auth/write/" method="get">
+      <button type="submit">글쓰기</button>
+    </form>
     <form action="/auth/logout" method="get">
       <button type="submit">로그아웃</button>
     </form>
